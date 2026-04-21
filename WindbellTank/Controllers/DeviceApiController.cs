@@ -37,7 +37,7 @@ namespace WindbellTank.Controllers
                     deviceSettingType  = 0, // 0=Remote — cihaz uzaqdan idarə olunur
                     tankList           = BuildTankVersionList()
                 },
-                msg = (string)null
+                msg = (string?)null
             });
         }
 
@@ -90,7 +90,7 @@ namespace WindbellTank.Controllers
                         used          = t.Enabled ? "1" : "0"
                     })
                 },
-                msg = (string)null
+                msg = (string?)null
             });
         }
 
@@ -125,7 +125,7 @@ namespace WindbellTank.Controllers
                         lowTemp      = p.LowTempC.ToString("F1")
                     })
                 },
-                msg = (string)null
+                msg = (string?)null
             });
         }
 
@@ -135,7 +135,7 @@ namespace WindbellTank.Controllers
         {
             string tankNo = "01";
             try { tankNo = body.GetProperty("data")
-                               .GetProperty("tankNo").GetString(); } catch { }
+                               .GetProperty("tankNo").GetString() ?? "01"; } catch { }
 
             var entries = _store.TankTable
                 .Where(e => e.TankNo == tankNo).ToList();
@@ -156,7 +156,7 @@ namespace WindbellTank.Controllers
                         volume = e.VolumeLiters.ToString()
                     })
                 },
-                msg = (string)null
+                msg = (string?)null
             });
         }
 
@@ -182,7 +182,7 @@ namespace WindbellTank.Controllers
                         used        = s.Enabled ? "1" : "0"
                     })
                 },
-                msg = (string)null
+                msg = (string?)null
             });
         }
 
@@ -209,7 +209,7 @@ namespace WindbellTank.Controllers
                         weightDensity = o.WeightDensity
                     })
                 },
-                msg = (string)null
+                msg = (string?)null
             });
         }
 
@@ -222,7 +222,7 @@ namespace WindbellTank.Controllers
                 code        = 200,
                 result      = 0,
                 commandType = 8,
-                msg         = (string)null
+                msg         = (string?)null
             });
         }
 
@@ -249,7 +249,7 @@ namespace WindbellTank.Controllers
                         densityFloatNo = d.DensityFloatNo
                     })
                 },
-                msg = (string)null
+                msg = (string?)null
             });
         }
 
@@ -262,7 +262,7 @@ namespace WindbellTank.Controllers
                 code        = 200,
                 result      = 0,
                 commandType = 18,
-                msg         = (string)null
+                msg         = (string?)null
             });
         }
 
@@ -287,7 +287,7 @@ namespace WindbellTank.Controllers
                         used        = g.Enabled ? "1" : "0"
                     })
                 },
-                msg = (string)null
+                msg = (string?)null
             });
         }
 
@@ -300,7 +300,7 @@ namespace WindbellTank.Controllers
                 code        = 200,
                 result      = 0,
                 commandType = 22,
-                msg         = (string)null
+                msg         = (string?)null
             });
         }
 
@@ -395,7 +395,7 @@ namespace WindbellTank.Controllers
                 Console.WriteLine($"[ERROR] UploadAtgData parse edilərkən xəta: {ex.Message}");
             }
 
-            return Ok(new { code = 200, result = 0, commandType = 1, msg = (string)null });
+            return Ok(new { code = 200, result = 0, commandType = 1, msg = (string?)null });
         }
 
         // ── ALARM DATA ─────────────────────────────────────────────────
@@ -403,25 +403,25 @@ namespace WindbellTank.Controllers
         public IActionResult UploadAlarmData([FromBody] JsonElement body)
         {
             Console.WriteLine("[⚠️ ATG ALARM] " + body.ToString());
-            return Ok(new { code=200, result=0, commandType=3, msg=(string)null });
+            return Ok(new { code=200, result=0, commandType=3, msg=(string?)null });
         }
 
         [HttpPost("uploadDeviceAlarmData")]
         public IActionResult UploadDeviceAlarmData([FromBody] JsonElement body)
         {
             Console.WriteLine("[⚠️ DEVICE ALARM] " + body.ToString());
-            return Ok(new { code=200, result=0, msg=(string)null });
+            return Ok(new { code=200, result=0, msg=(string?)null });
         }
 
         // Helpers
         private string GetIotDevId(JsonElement body)
         {
-            try { return body.GetProperty("data").GetProperty("iotDevID").GetString(); }
+            try { return body.GetProperty("data").GetProperty("iotDevID").GetString() ?? "unknown"; }
             catch { return "unknown"; }
         }
         private string GetStr(JsonElement el, string key)
         {
-            try { return el.GetProperty(key).GetString(); } catch { return "-"; }
+            try { return el.GetProperty(key).GetString() ?? "-"; } catch { return "-"; }
         }
 
         // ── MODBUS CRC16 HESABLANMASI (Token Sign üçün) ────────────────

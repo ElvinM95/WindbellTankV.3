@@ -104,7 +104,7 @@ namespace WindbellTank.Services
 
             if (code != 200 || result != 0)
             {
-                string msg = root.TryGetProperty("msg", out var msgEl) ? msgEl.GetString() : "Bilinməyən xəta baş verdi";
+                string msg = root.TryGetProperty("msg", out var msgEl) ? msgEl.GetString() ?? "Bilinməyən xəta baş verdi" : "Bilinməyən xəta baş verdi";
                 throw new Exception($"Cihaz API xətası (Endpoint: {endpoint}): Code={code}, Result={result}, Mesaj={msg}");
             }
 

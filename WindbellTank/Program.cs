@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
-using System.Data.SqlClient;
+using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
@@ -16,14 +16,14 @@ namespace WindbellTank
 {
     public class ErrorData
     {
-        public string code { get; set; }
-        public string message { get; set; }
+        public string code { get; set; } = string.Empty;
+        public string message { get; set; } = string.Empty;
     }
 
     public class TankData
     {
         public int tank_id { get; set; }
-        public string product_code { get; set; }
+        public string? product_code { get; set; }
         public decimal? oil_level { get; set; }
         public decimal? water_level { get; set; }
         public decimal? temperature { get; set; }
@@ -32,28 +32,27 @@ namespace WindbellTank
         public decimal? tc_volume { get; set; }
         public decimal? capacity { get; set; }
         public decimal? Ullage { get; set; }
-        public string sensor_status { get; set; }
-        public ErrorData error { get; set; }
+        public string? sensor_status { get; set; }
+        public ErrorData? error { get; set; }
     }
 
     public class AtgMetadata
     {
-        public string request_id { get; set; }
-        public string timestamp { get; set; }
+        public string request_id { get; set; } = string.Empty;
+        public string timestamp { get; set; } = string.Empty;
     }
 
     public class AtgResponse
     {
         public bool success { get; set; }
-        public AtgMetadata metadata { get; set; }
-        public List<TankData> data { get; set; }
+        public AtgMetadata? metadata { get; set; }
+        public List<TankData> data { get; set; } = new();
     }
 
     class Program
     {
-        private static bool _tableEnsured = false;
         private static readonly CancellationTokenSource _cts = new CancellationTokenSource();
-        private static string _lastAtgDataCache = null; // YENİ: Eyni datanın təkrar-təkrar bazaya yazılmasının qarşısını alacaq yaddaş
+        private static string? _lastAtgDataCache = null; // YENİ: Eyni datanın təkrar-təkrar bazaya yazılmasının qarşısını alacaq yaddaş
 
         // Gələcəkdə mesajları vahid formatda çıxarmaq üçün loqlama funksiyası (Vaqt göstəricisi ilə)
         static void Log(string message, ConsoleColor color = ConsoleColor.White)
@@ -95,7 +94,7 @@ namespace WindbellTank
             return 1; // Default - Heç nə tapılmazsa 1 qayıdırıq ki, xəta atmasın və ən azı 1 çəni yoxlasın.
         }
 
-        static string GetIpFromDatabase()
+        static string? GetIpFromDatabase()
         {
             try
             {
@@ -108,7 +107,7 @@ namespace WindbellTank
                         var res = cmd.ExecuteScalar();
                         if (res != null && res != DBNull.Value)
                         {
-                            return res.ToString().Trim();
+                            return res.ToString()?.Trim() ?? string.Empty;
                         }
                     }
                 }
@@ -169,49 +168,7 @@ namespace WindbellTank
 
         static void EnsureDatabaseTables()
         {
-            return; // Ləğv edildi, çünki AtgData əvəzinə hazır TankConfig işlədirik
-
-            try
-            {
-                using (var conn = new SqlConnection(GetConnectionString()))
-                {
-                    conn.Open();
-                    // GƏLƏCƏYƏ DÖNÜK: ErrorMessage nvarchar(max) olaraq təyin edilib ki, kəsilmə(Truncation) baş verməsin
-                    string createTableSql = @"
-                        IF NOT EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[AtgData]') AND type in (N'U'))
-                        BEGIN
-                            CREATE TABLE [dbo].[AtgData](
-                                [Id] [int] IDENTITY(1,1) NOT NULL PRIMARY KEY,
-                                [RequestTimestamp] [nvarchar](50) NULL,
-                                [RequestId] [nvarchar](50) NULL,
-                                [TankId] [int] NULL,
-                                [ProductCode] [nvarchar](50) NULL,
-                                [OilLevel] [float] NULL,
-                                [WaterLevel] [float] NULL,
-                                [Temperature] [float] NULL,
-                                [Volume] [float] NULL,
-                                [WaterVolume] [float] NULL,
-                                [TcVolume] [float] NULL,
-                                [Capacity] [float] NULL,
-                                [Ullage] [float] NULL,
-                                [SensorStatus] [nvarchar](50) NULL,
-                                [ErrorCode] [nvarchar](50) NULL,
-                                [ErrorMessage] [nvarchar](max) NULL,
-                                [CreatedAt] [datetime] DEFAULT GETDATE()
-                            )
-                        END";
-
-                    using (var cmd = new SqlCommand(createTableSql, conn))
-                    {
-                        cmd.ExecuteNonQuery();
-                    }
-                    _tableEnsured = true;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log($"\u26A0 AtgData cədvəli qurularkən və ya yoxlanılarkən xəta: {ex.Message}", ConsoleColor.Red);
-            }
+            // Ləğv edildi, çünki AtgData əvəzinə hazır TankConfig işlədirik
         }
 
         static void SaveAtgDataToDatabase(AtgResponse response)
@@ -284,17 +241,17 @@ namespace WindbellTank
                                     }
                                     
                                     cmd.Parameters.AddWithValue("@YanacaqCode", yanacaqCodeVal);
-                                    cmd.Parameters.AddWithValue("@TankFyelName", (object)tank.product_code ?? DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@TankFyelName", (object?)tank.product_code ?? DBNull.Value);
 
-                                    cmd.Parameters.AddWithValue("@TankCapacity", (object)tank.capacity ?? DBNull.Value);
-                                    cmd.Parameters.AddWithValue("@TankLength", (object)tank.oil_level ?? DBNull.Value);
-                                    cmd.Parameters.AddWithValue("@CurrentVolume", (object)tank.volume ?? DBNull.Value);
-                                    cmd.Parameters.AddWithValue("@WaterLevel", (object)tank.water_level ?? DBNull.Value);
-                                    cmd.Parameters.AddWithValue("@Temperature", (object)tank.temperature ?? DBNull.Value);
-                                    cmd.Parameters.AddWithValue("@WaterVolume", (object)tank.water_volume ?? DBNull.Value);
-                                    cmd.Parameters.AddWithValue("@TcVolume", (object)tank.tc_volume ?? DBNull.Value);
-                                    cmd.Parameters.AddWithValue("@Ullage", (object)tank.Ullage ?? DBNull.Value);
-                                    cmd.Parameters.AddWithValue("@SensorStatus", (object)tank.sensor_status ?? "");
+                                    cmd.Parameters.AddWithValue("@TankCapacity", (object?)tank.capacity ?? DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@TankLength", (object?)tank.oil_level ?? DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@CurrentVolume", (object?)tank.volume ?? DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@WaterLevel", (object?)tank.water_level ?? DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@Temperature", (object?)tank.temperature ?? DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@WaterVolume", (object?)tank.water_volume ?? DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@TcVolume", (object?)tank.tc_volume ?? DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@Ullage", (object?)tank.Ullage ?? DBNull.Value);
+                                    cmd.Parameters.AddWithValue("@SensorStatus", (object?)tank.sensor_status ?? "");
 
                                     string errorDesc = "";
                                     if (tank.error != null && (!string.IsNullOrEmpty(tank.error.code) || !string.IsNullOrEmpty(tank.error.message)))
@@ -338,7 +295,7 @@ namespace WindbellTank
             };
 
             int devicePort = 5656;
-            string deviceIp = null;
+            string? deviceIp = null;
 
             Log("--- Windbell WB-SS200 Test Başladı ---", ConsoleColor.Cyan);
 
@@ -391,7 +348,7 @@ namespace WindbellTank
                         Console.ResetColor();
 
                         // Ctrl+C edilibsə bura kəsiləcək. Konsolu dondurmaması üçün sadəcə oxuma gözləyirik.
-                        string inputIp = Console.ReadLine()?.Trim();
+                        string? inputIp = Console.ReadLine()?.Trim();
                         if (!string.IsNullOrEmpty(inputIp))
                         {
                             deviceIp = inputIp;
@@ -442,7 +399,7 @@ namespace WindbellTank
                                     // 2. Cavabı tam göndərilənədək yığıb oxumaq
                                     StringBuilder responseBuilder = new StringBuilder();
                                     byte[] buffer = new byte[8192];
-                                    AtgResponse result = null;
+                                    AtgResponse? result = null;
                                     var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
 
                                     while (true)
@@ -479,7 +436,7 @@ namespace WindbellTank
                                             // Lazımsız Exception-ların (CPU yükləməsinin) qarşısını alır.
                                             if (trimmed.StartsWith("{") && trimmed.EndsWith("}"))
                                             {
-                                                result = JsonSerializer.Deserialize<AtgResponse>(currentResponse, options);
+                                                result = JsonSerializer.Deserialize<AtgResponse?>(currentResponse, options);
                                                 if (result != null)
                                                 {
                                                     break; // Tam ölçülü və etibarlı JSON oxundu
@@ -604,7 +561,7 @@ namespace WindbellTank
                         Console.Write("Zəhmət olmasa yeni IP ünvanı daxil edin (Boş buraxıb ENTER bassanız 30 saniyə gözləyəcək): ");
                         Console.ResetColor();
                         
-                        string newIp = Console.ReadLine()?.Trim();
+                        string? newIp = Console.ReadLine()?.Trim();
                         if (!string.IsNullOrEmpty(newIp))
                         {
                             deviceIp = newIp;

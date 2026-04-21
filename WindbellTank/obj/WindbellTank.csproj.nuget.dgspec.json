@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Elvin\\Documents\\E\\MyHub\\WindbellTankV.3\\WindbellTank\\WindbellTank.csproj": {}
+    "C:\\Users\\Elvin\\Documents\\E\\MyHub\\WindbellTankV.3 (HTTPDone)\\WindbellTank\\WindbellTank.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Elvin\\Documents\\E\\MyHub\\WindbellTankV.3\\WindbellTank\\WindbellTank.csproj": {
+    "C:\\Users\\Elvin\\Documents\\E\\MyHub\\WindbellTankV.3 (HTTPDone)\\WindbellTank\\WindbellTank.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Elvin\\Documents\\E\\MyHub\\WindbellTankV.3\\WindbellTank\\WindbellTank.csproj",
+        "projectUniqueName": "C:\\Users\\Elvin\\Documents\\E\\MyHub\\WindbellTankV.3 (HTTPDone)\\WindbellTank\\WindbellTank.csproj",
         "projectName": "WindbellTank",
-        "projectPath": "C:\\Users\\Elvin\\Documents\\E\\MyHub\\WindbellTankV.3\\WindbellTank\\WindbellTank.csproj",
+        "projectPath": "C:\\Users\\Elvin\\Documents\\E\\MyHub\\WindbellTankV.3 (HTTPDone)\\WindbellTank\\WindbellTank.csproj",
         "packagesPath": "C:\\Users\\Elvin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Elvin\\Documents\\E\\MyHub\\WindbellTankV.3\\WindbellTank\\obj\\",
+        "outputPath": "C:\\Users\\Elvin\\Documents\\E\\MyHub\\WindbellTankV.3 (HTTPDone)\\WindbellTank\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -51,9 +51,9 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
-            "System.Data.SqlClient": {
+            "Microsoft.Data.SqlClient": {
               "target": "Package",
-              "version": "[4.9.1, )"
+              "version": "[5.2.2, )"
             }
           },
           "imports": [

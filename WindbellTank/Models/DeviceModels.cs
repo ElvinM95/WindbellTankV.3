@@ -4,10 +4,10 @@ namespace WindbellTank.Models
 {
     public class TankSetting
     {
-        public string TankNo        { get; set; }
+        public string TankNo        { get; set; } = string.Empty;
         public string Version       { get; set; } = "1";
-        public string OilCode       { get; set; }
-        public string OilName       { get; set; }
+        public string OilCode       { get; set; } = string.Empty;
+        public string OilName       { get; set; } = string.Empty;
         public int    DiameterMm    { get; set; }
         public int    VolumeLiters  { get; set; }
         public string ExpansionRate { get; set; } = "0.0012";
@@ -16,8 +16,8 @@ namespace WindbellTank.Models
 
     public class ProbeSetting
     {
-        public string TankNo        { get; set; }
-        public string ProbeId       { get; set; }
+        public string TankNo        { get; set; } = string.Empty;
+        public string ProbeId       { get; set; } = string.Empty;
         public string Version       { get; set; } = "1";
         public bool   IsDensityProbe { get; set; }
         public double OilOffsetMm   { get; set; }
@@ -35,7 +35,7 @@ namespace WindbellTank.Models
 
     public class SensorSetting
     {
-        public string SensorNo   { get; set; }
+        public string SensorNo   { get; set; } = string.Empty;
         public string SensorType { get; set; } = "0";
         public string Position   { get; set; } = "0";
         public string PositionNum { get; set; } = "01";
@@ -44,29 +44,29 @@ namespace WindbellTank.Models
 
     public class OilProductSetting
     {
-        public string OilCode       { get; set; }  // "1020"
-        public string OilName       { get; set; }  // "92#"
-        public string OilColor      { get; set; }  // "red", "blue" və s.
-        public string ExpansionRate { get; set; }  // benzin: "0.0012", dizel: "0.0008"
-        public string Temperature   { get; set; }  // hesablama temperaturu
-        public string WeightDensity { get; set; }  // çəki sıxlığı
+        public string OilCode       { get; set; } = string.Empty;  // "1020"
+        public string OilName       { get; set; } = string.Empty;  // "92#"
+        public string OilColor      { get; set; } = string.Empty;  // "red", "blue" və s.
+        public string ExpansionRate { get; set; } = string.Empty;  // benzin: "0.0012", dizel: "0.0008"
+        public string Temperature   { get; set; } = string.Empty;  // hesablama temperaturu
+        public string WeightDensity { get; set; } = string.Empty;  // çəki sıxlığı
     }
 
     public class DensitySetting
     {
-        public string TankNo          { get; set; }  // "01"~"12"
+        public string TankNo          { get; set; } = string.Empty;  // "01"~"12"
         public string Version         { get; set; } = "1";
-        public string HeightDiff      { get; set; }  // hündürlük fərqi
-        public string FixRate         { get; set; }  // korreksiya əmsalı
-        public string InitDensity     { get; set; }  // başlanğıc sıxlığı
-        public string SecondDensity   { get; set; }  // ikinci sıxlıq
-        public string DensityFloatNo  { get; set; }  // sıxlıq üzən nömrəsi
-        public string Remark          { get; set; }
+        public string HeightDiff      { get; set; } = string.Empty;  // hündürlük fərqi
+        public string FixRate         { get; set; } = string.Empty;  // korreksiya əmsalı
+        public string InitDensity     { get; set; } = string.Empty;  // başlanğıc sıxlığı
+        public string SecondDensity   { get; set; } = string.Empty;  // ikinci sıxlıq
+        public string DensityFloatNo  { get; set; } = string.Empty;  // sıxlıq üzən nömrəsi
+        public string Remark          { get; set; } = string.Empty;
     }
 
     public class GasSensorSetting
     {
-        public string SensorNo   { get; set; }  // "01"~"64"
+        public string SensorNo   { get; set; } = string.Empty;  // "01"~"64"
         // Mövqe: 0=yanacaq adası, 1=boşaltma ağzı,
         //        2=adam quyusu, 3=digər
         public string Position   { get; set; } = "0";
@@ -76,7 +76,7 @@ namespace WindbellTank.Models
 
     public class TankTableEntry
     {
-        public string TankNo      { get; set; }
+        public string TankNo      { get; set; } = string.Empty;
         public int    HeightMm    { get; set; }
         public int    VolumeLiters { get; set; }
     }
