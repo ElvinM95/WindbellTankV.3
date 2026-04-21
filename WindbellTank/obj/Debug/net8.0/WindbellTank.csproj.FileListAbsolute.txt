@@ -138,3 +138,4 @@ C:\Users\Elvin\Documents\E\MyHub\WindbellTankV.3 (HTTPDone)\WindbellTank\bin\Deb
 C:\Users\Elvin\Documents\E\MyHub\WindbellTankV.3 (HTTPDone)\WindbellTank\bin\Debug\net8.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
 C:\Users\Elvin\Documents\E\MyHub\WindbellTankV.3 (HTTPDone)\WindbellTank\bin\Debug\net8.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
 C:\Users\Elvin\Documents\E\MyHub\WindbellTankV.3 (HTTPDone)\WindbellTank\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Runtime.Caching.dll
+C:\Users\Elvin\Documents\E\MyHub\WindbellTankV.3 (HTTPDone)\WindbellTank\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
