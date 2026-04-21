@@ -308,11 +308,94 @@ namespace WindbellTank.Controllers
         [HttpPost("uploadAtgData")]
         public IActionResult UploadAtgData([FromBody] JsonElement body)
         {
-            var data = body.GetProperty("data");
-            Console.WriteLine($"[DATA] Tank: {GetStr(data,"tankNo")} " +
-                             $"Səviyyə: {GetStr(data,"totalH")}mm " +
-                             $"Həcm: {GetStr(data,"oilVt")}L");
-            return Ok(new { code=200, result=0, commandType=1, msg=(string)null });
+            try
+            {
+                var data = body.GetProperty("data");
+
+                // İdentifikasiya
+                string iotDevID = GetStr(data, "iotDevID");
+                string tankNo = GetStr(data, "tankNo");
+                string oilCode = GetStr(data, "oilCode");
+                string oilName = GetStr(data, "oilName");
+
+                // Səviyyə məlumatları
+                string totalH = GetStr(data, "totalH");
+                string waterH = GetStr(data, "waterH");
+                string oilVt = GetStr(data, "oilVt");
+                string waterVt = GetStr(data, "waterVt");
+                string ullage = GetStr(data, "ullage");
+
+                // Temperatur
+                string oilT = GetStr(data, "oilT");
+                string t1 = GetStr(data, "t1");
+                string t2 = GetStr(data, "t2");
+                string t3 = GetStr(data, "t3");
+                string t4 = GetStr(data, "t4");
+
+                // Həcm Kompensasiyası
+                string oilV20 = GetStr(data, "oilV20");
+                string totalV20 = GetStr(data, "totalV20");
+
+                // Status
+                string probeValveCode = GetStr(data, "probeValve");
+                string probeValveText = probeValveCode switch
+                {
+                    "1" => "Normal",
+                    "4" => "Xəta",
+                    "6" => "Siqnal kəsildi",
+                    _ => $"Bilinmir ({probeValveCode})"
+                };
+
+                // Digər
+                string density = GetStr(data, "density");
+                string weight = GetStr(data, "weight");
+                string rawTime = GetStr(data, "uploadTime");
+                
+                string formattedTime = rawTime;
+                if (DateTime.TryParse(rawTime, out DateTime parsedTime))
+                {
+                    formattedTime = parsedTime.ToString("yyyy-MM-dd HH:mm:ss");
+                }
+                else if (!string.IsNullOrEmpty(rawTime) && rawTime.Length == 14 && long.TryParse(rawTime, out _))
+                {
+                    if (DateTime.TryParseExact(rawTime, "yyyyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime exactParsed))
+                    {
+                        formattedTime = exactParsed.ToString("yyyy-MM-dd HH:mm:ss");
+                    }
+                }
+
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("\n=========================================");
+                sb.AppendLine($"[REAL-TIME DATA] Yüklənmə Vaxtı: {formattedTime}");
+                
+                sb.AppendLine("--- İdentifikasiya ---");
+                sb.AppendLine($"Cihaz ID: {iotDevID} | Çən №: {tankNo} | Məhsul: {oilCode} ({oilName})");
+                
+                sb.AppendLine("--- Səviyyə Məlumatları ---");
+                sb.AppendLine($"Ümumi hündürlük: {totalH} mm | Su səviyyəsi: {waterH} mm");
+                sb.AppendLine($"Xalis yanacaq həcmi: {oilVt} L | Su həcmi: {waterVt} L | Boş qalan həcm (Ullage): {ullage} L");
+
+                sb.AppendLine("--- Temperatur ---");
+                sb.AppendLine($"Ortalama Temp: {oilT} °C (T1: {t1}, T2: {t2}, T3: {t3}, T4: {t4})");
+
+                sb.AppendLine("--- Həcm Kompensasiyası ---");
+                sb.AppendLine($"V20 Standart Həcm: {oilV20} L | Ümumi Standart Həcm: {totalV20} L");
+
+                sb.AppendLine("--- Status ---");
+                sb.AppendLine($"Zond Statusu: {probeValveText}");
+
+                sb.AppendLine("--- Digər ---");
+                sb.AppendLine($"Sıxlıq: {density} kg/m³ | Çəki: {weight} kq");
+                sb.AppendLine("=========================================");
+
+                Console.WriteLine(sb.ToString());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] UploadAtgData parse edilərkən xəta: {ex.Message}");
+            }
+
+            return Ok(new { code = 200, result = 0, commandType = 1, msg = (string)null });
         }
 
         // ── ALARM DATA ─────────────────────────────────────────────────
@@ -339,6 +422,48 @@ namespace WindbellTank.Controllers
         private string GetStr(JsonElement el, string key)
         {
             try { return el.GetProperty(key).GetString(); } catch { return "-"; }
+        }
+
+        // ── MODBUS CRC16 HESABLANMASI (Token Sign üçün) ────────────────
+        // Cihaza parametr/ayar göndərərkən "token" bloku daxilində "sign" parametrini hesablamaq üçün
+        [NonAction]
+        public string CalculateModbusCrc16(string input)
+        {
+            if (string.IsNullOrEmpty(input)) return string.Empty;
+            
+            // Cihaz sənədlərinə əsasən şifrələnəcək məlumat UTF-8 yaxud ASCII ola bilər
+            byte[] data = System.Text.Encoding.UTF8.GetBytes(input);
+            return CalculateModbusCrc16(data);
+        }
+
+        [NonAction]
+        public string CalculateModbusCrc16(byte[] data)
+        {
+            ushort crc = 0xFFFF;
+            for (int i = 0; i < data.Length; i++)
+            {
+                crc ^= data[i];
+                for (int j = 0; j < 8; j++)
+                {
+                    if ((crc & 1) != 0)
+                    {
+                        crc >>= 1;
+                        crc ^= 0xA001;
+                    }
+                    else
+                    {
+                        crc >>= 1;
+                    }
+                }
+            }
+            
+            // Cihazın tələbindən asılı olaraq CRC baytlarının yeri (Little Endian / Big Endian) dəyişə bilər.
+            // Bu kod nəticəni HEX formatında (məs: "A1B2") qaytarır.
+            // Əgər cihaz "Little Endian" (kiçik bayt öndə) istəyirsə, aşağıdakı qaydada çevirə bilərsiniz:
+            // byte[] crcBytes = BitConverter.GetBytes(crc);
+            // return BitConverter.ToString(crcBytes).Replace("-", "");
+
+            return crc.ToString("X4");
         }
     }
 }
